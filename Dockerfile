@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     ripgrep \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g @openai/codex
+RUN npm install -g @openai/codex opencode-ai@latest @anthropic-ai/claude-code
 
 RUN useradd -ms /bin/bash coder
 

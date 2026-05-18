@@ -1,6 +1,6 @@
 # codex-dev
 
-本仓库用于通过 GitHub Actions 自动构建 Codex 开发镜像，并推送到 GitHub Container Registry。
+本仓库用于通过 GitHub Actions 自动构建开发镜像，并推送到 GitHub Container Registry。
 
 ## 包含文件
 
@@ -63,6 +63,12 @@ docker run -it --rm \
   -e OPENAI_API_KEY=xxx \
   ghcr.io/<github-username>/codex-dev:latest
 ```
+
+镜像内可直接使用：
+
+- `codex`
+- `opencode`
+- `claude`
 
 ## 可选升级
 
