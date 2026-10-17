@@ -122,6 +122,8 @@ docker run -it --rm \
 | `SSH_PASSWORD` | `coder` | SSH 登录密码，请务必修改 |
 | `SSH_PUBLIC_KEY` | 空 | 注入到 `authorized_keys` 的公钥，支持密钥登录 |
 | `SSH_KEY_PASSPHRASE` | 空 | 自动生成的 Git SSH 私钥密码短语；留空以支持无人值守 Git 操作 |
+| `GIT_USER_NAME` | 空 | Git commit 使用的用户名 |
+| `GIT_USER_EMAIL` | 空 | Git commit 使用的邮箱 |
 
 ## Docker Compose 示例
 

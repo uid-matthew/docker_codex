@@ -5,6 +5,8 @@ SSH_USER="${SSH_USER:-coder}"
 SSH_PASSWORD="${SSH_PASSWORD:-coder}"
 SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY:-}"
 SSH_KEY_PASSPHRASE="${SSH_KEY_PASSPHRASE:-}"
+GIT_USER_NAME="${GIT_USER_NAME:-}"
+GIT_USER_EMAIL="${GIT_USER_EMAIL:-}"
 
 if ! id "$SSH_USER" >/dev/null 2>&1; then
   useradd -ms /bin/bash "$SSH_USER"
@@ -39,6 +41,14 @@ if [ ! -f "/home/$SSH_USER/.ssh/known_hosts" ]; then
 fi
 
 chown -R "$SSH_USER:$SSH_USER" "/home/$SSH_USER/.ssh"
+
+if [ -n "$GIT_USER_NAME" ]; then
+  gosu "$SSH_USER" git config --global user.name "$GIT_USER_NAME"
+fi
+
+if [ -n "$GIT_USER_EMAIL" ]; then
+  gosu "$SSH_USER" git config --global user.email "$GIT_USER_EMAIL"
+fi
 
 echo "$SSH_USER:$SSH_PASSWORD" | chpasswd
 

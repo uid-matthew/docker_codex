@@ -14,4 +14,6 @@ services:
       SSH_PASSWORD: change-me
       SSH_PUBLIC_KEY: ""
       SSH_KEY_PASSPHRASE: ""
+      GIT_USER_NAME: "Your Name"
+      GIT_USER_EMAIL: "your@email.com"
       OPENAI_API_KEY: "xxx"
