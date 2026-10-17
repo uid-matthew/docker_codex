@@ -73,7 +73,7 @@ docker pull ghcr.io/<github-username>/codex-dev:latest
 docker run -d --name codex-dev \
   -p 10022:22 \
   -v $(pwd):/workspace \
-  -v $(pwd)/ssh:/home/coder/.ssh \
+  -v $(pwd)/home/coder:/home/coder \
   -e SSH_PASSWORD=your-password \
   -e SSH_PUBLIC_KEY="ssh-ed25519 AAAA... user@host" \
   -e OPENAI_API_KEY=xxx \
@@ -88,10 +88,10 @@ ssh -p 10022 coder@<NAS-IP>
 
 如果使用密钥登录，把私钥对应的公钥通过 `SSH_PUBLIC_KEY` 注入即可；也可以直接使用密码登录。
 
-首次启动时，容器会在宿主机的 `./ssh` 目录中自动生成一对 Ed25519 密钥：
+首次启动时，容器会在宿主机的 `./home/coder/.ssh` 目录中自动生成一对 Ed25519 密钥：
 
 ```bash
-cat ssh/id_ed25519.pub
+cat home/coder/.ssh/id_ed25519.pub
 ```
 
 将公钥添加到 GitHub 的 SSH Keys 后，容器内即可使用 `git pull` 和 `git push`。已有密钥不会被覆盖。`SSH_KEY_PASSPHRASE` 默认为空，适合容器无人值守执行 Git 操作；如果设置密码短语，则需要在容器内额外使用 ssh-agent。
@@ -102,14 +102,14 @@ cat ssh/id_ed25519.pub
 ssh -A -p 10022 coder@<NAS-IP>
 ```
 
-Agent forwarding 可用时优先使用转发的密钥；不可用时，SSH 会使用容器内 `./ssh/id_ed25519` 作为备用密钥。
+Agent forwarding 可用时优先使用转发的密钥；不可用时，SSH 会使用容器内 `./home/coder/.ssh/id_ed25519` 作为备用密钥。
 
 如需交互式 shell，也可以在启动时覆盖默认命令：
 
 ```bash
 docker run -it --rm \
   -v $(pwd):/workspace \
-  -v $(pwd)/ssh:/home/coder/.ssh \
+  -v $(pwd)/home/coder:/home/coder \
   -e OPENAI_API_KEY=xxx \
   ghcr.io/<github-username>/codex-dev:latest bash
 ```

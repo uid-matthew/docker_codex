@@ -8,7 +8,7 @@ services:
       - "10022:22"
     volumes:
       - ./workspace:/workspace
-      - ./ssh:/home/coder/.ssh
+      - ./home/coder:/home/coder
     environment:
       SSH_USER: coder
       SSH_PASSWORD: change-me

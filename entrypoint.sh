@@ -32,15 +32,18 @@ if [ ! -f "$PUBLIC_KEY" ]; then
   ssh-keygen -y -f "$PRIVATE_KEY" > "$PUBLIC_KEY"
 fi
 
-chmod 600 "$PRIVATE_KEY"
-chmod 644 "$PUBLIC_KEY"
-
 if [ ! -f "/home/$SSH_USER/.ssh/known_hosts" ]; then
   ssh-keyscan -H github.com > "/home/$SSH_USER/.ssh/known_hosts" 2>/dev/null || true
   chmod 644 "/home/$SSH_USER/.ssh/known_hosts"
 fi
 
-chown -R "$SSH_USER:$SSH_USER" "/home/$SSH_USER/.ssh"
+chown -R "$SSH_USER:$SSH_USER" "/home/$SSH_USER"
+chmod 700 "/home/$SSH_USER/.ssh"
+chmod 600 "$PRIVATE_KEY"
+chmod 644 "$PUBLIC_KEY"
+if [ -f "/home/$SSH_USER/.ssh/authorized_keys" ]; then
+  chmod 600 "/home/$SSH_USER/.ssh/authorized_keys"
+fi
 
 if [ -n "$GIT_USER_NAME" ]; then
   gosu "$SSH_USER" git config --global user.name "$GIT_USER_NAME"
