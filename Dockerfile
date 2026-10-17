@@ -25,6 +25,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g @openai/codex opencode-ai@latest @anthropic-ai/claude-code
 
+RUN CC_SWITCH_INSTALL_DIR=/usr/local/bin CC_SWITCH_FORCE=1 \
+    curl -fsSL https://raw.githubusercontent.com/SaladDay/cc-switch-cli/main/install.sh | bash
+
 RUN useradd -ms /bin/bash coder \
     && mkdir -p /home/coder/.ssh /var/run/sshd /workspace \
     && chown -R coder:coder /home/coder/.ssh /workspace \
