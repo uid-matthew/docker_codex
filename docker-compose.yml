@@ -5,11 +5,13 @@ services:
     hostname: codex-dev
     restart: unless-stopped
     ports:
-      - "2222:22"
+      - "10022:22"
     volumes:
       - ./workspace:/workspace
+      - ./ssh:/home/coder/.ssh
     environment:
       SSH_USER: coder
       SSH_PASSWORD: change-me
-      SSH_PUBLIC_KEY: "ssh-ed25519 AAAA... user@host"
+      SSH_PUBLIC_KEY: ""
+      SSH_KEY_PASSPHRASE: ""
       OPENAI_API_KEY: "xxx"

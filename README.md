@@ -7,6 +7,7 @@
 - `Dockerfile`
 - `entrypoint.sh`
 - `docker-compose.yml`
+- `.gitignore`
 - `.github/workflows/docker.yml`
 - `.dockerignore`
 
@@ -70,27 +71,45 @@ docker pull ghcr.io/<github-username>/codex-dev:latest
 
 ```bash
 docker run -d --name codex-dev \
-  -p 2222:22 \
+  -p 10022:22 \
   -v $(pwd):/workspace \
+  -v $(pwd)/ssh:/home/coder/.ssh \
   -e SSH_PASSWORD=your-password \
   -e SSH_PUBLIC_KEY="ssh-ed25519 AAAA... user@host" \
   -e OPENAI_API_KEY=xxx \
   ghcr.io/<github-username>/codex-dev:latest
 ```
 
-容器内 `sshd` 监听默认 `22` 端口，通过宿主机端口映射（上面映射到宿主机 `2222`）对外暴露。建议映射到一个非默认端口，再用 SSH 登录：
+容器内 `sshd` 监听默认 `22` 端口，通过宿主机端口 `10022` 对外暴露。使用 `ssh` 登录：
 
 ```bash
-ssh -p 2222 coder@<NAS-IP>
+ssh -p 10022 coder@<NAS-IP>
 ```
 
 如果使用密钥登录，把私钥对应的公钥通过 `SSH_PUBLIC_KEY` 注入即可；也可以直接使用密码登录。
+
+首次启动时，容器会在宿主机的 `./ssh` 目录中自动生成一对 Ed25519 密钥：
+
+```bash
+cat ssh/id_ed25519.pub
+```
+
+将公钥添加到 GitHub 的 SSH Keys 后，容器内即可使用 `git pull` 和 `git push`。已有密钥不会被覆盖。`SSH_KEY_PASSPHRASE` 默认为空，适合容器无人值守执行 Git 操作；如果设置密码短语，则需要在容器内额外使用 ssh-agent。
+
+从 MacBook 或 Windows 通过 SSH 登录时，可以使用 Agent forwarding：
+
+```bash
+ssh -A -p 10022 coder@<NAS-IP>
+```
+
+Agent forwarding 可用时优先使用转发的密钥；不可用时，SSH 会使用容器内 `./ssh/id_ed25519` 作为备用密钥。
 
 如需交互式 shell，也可以在启动时覆盖默认命令：
 
 ```bash
 docker run -it --rm \
   -v $(pwd):/workspace \
+  -v $(pwd)/ssh:/home/coder/.ssh \
   -e OPENAI_API_KEY=xxx \
   ghcr.io/<github-username>/codex-dev:latest bash
 ```
@@ -102,6 +121,7 @@ docker run -it --rm \
 | `SSH_USER` | `coder` | SSH 登录用户名 |
 | `SSH_PASSWORD` | `coder` | SSH 登录密码，请务必修改 |
 | `SSH_PUBLIC_KEY` | 空 | 注入到 `authorized_keys` 的公钥，支持密钥登录 |
+| `SSH_KEY_PASSPHRASE` | 空 | 自动生成的 Git SSH 私钥密码短语；留空以支持无人值守 Git 操作 |
 
 ## Docker Compose 示例
 
@@ -114,7 +134,7 @@ docker compose up -d
 启动后通过宿主机映射端口登录：
 
 ```bash
-ssh -p 2222 coder@<NAS-IP>
+ssh -p 10022 coder@<NAS-IP>
 ```
 
 如需更新镜像版本：

@@ -4,6 +4,7 @@ set -e
 SSH_USER="${SSH_USER:-coder}"
 SSH_PASSWORD="${SSH_PASSWORD:-coder}"
 SSH_PUBLIC_KEY="${SSH_PUBLIC_KEY:-}"
+SSH_KEY_PASSPHRASE="${SSH_KEY_PASSPHRASE:-}"
 
 if ! id "$SSH_USER" >/dev/null 2>&1; then
   useradd -ms /bin/bash "$SSH_USER"
@@ -17,6 +18,26 @@ if [ -n "$SSH_PUBLIC_KEY" ]; then
   chmod 600 "/home/$SSH_USER/.ssh/authorized_keys"
 fi
 
+PRIVATE_KEY="/home/$SSH_USER/.ssh/id_ed25519"
+PUBLIC_KEY="${PRIVATE_KEY}.pub"
+
+if [ ! -f "$PRIVATE_KEY" ]; then
+  ssh-keygen -q -t ed25519 -N "$SSH_KEY_PASSPHRASE" \
+    -f "$PRIVATE_KEY" -C "$SSH_USER@codex-dev"
+fi
+
+if [ ! -f "$PUBLIC_KEY" ]; then
+  ssh-keygen -y -f "$PRIVATE_KEY" > "$PUBLIC_KEY"
+fi
+
+chmod 600 "$PRIVATE_KEY"
+chmod 644 "$PUBLIC_KEY"
+
+if [ ! -f "/home/$SSH_USER/.ssh/known_hosts" ]; then
+  ssh-keyscan -H github.com > "/home/$SSH_USER/.ssh/known_hosts" 2>/dev/null || true
+  chmod 644 "/home/$SSH_USER/.ssh/known_hosts"
+fi
+
 chown -R "$SSH_USER:$SSH_USER" "/home/$SSH_USER/.ssh"
 
 echo "$SSH_USER:$SSH_PASSWORD" | chpasswd
@@ -27,6 +48,8 @@ mkdir -p /run/sshd
 /usr/sbin/sshd
 
 echo "sshd started for user '$SSH_USER' (password auth + pubkey auth enabled)"
+echo "Git SSH public key:"
+ssh-keygen -lf "$PUBLIC_KEY"
 
 if [ "$#" -eq 0 ]; then
   set -- bash

@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     ripgrep \
     python3 \
     python3-pip \
+    openssh-client \
     openssh-server \
     gosu \
     && mkdir -p /etc/apt/keyrings \
@@ -30,6 +31,7 @@ RUN useradd -ms /bin/bash coder \
     && printf '%s\n' \
         'PasswordAuthentication yes' \
         'PubkeyAuthentication yes' \
+        'AllowAgentForwarding yes' \
         'PermitRootLogin no' \
         > /etc/ssh/sshd_config.d/00-ssh-dev.conf
 
