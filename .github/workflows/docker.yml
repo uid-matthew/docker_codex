@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "镜像附加标签（可选，例如工具版本号）"
+        required: false
+        default: ""
+      no_cache:
+        description: "禁用构建缓存（强制重新安装最新工具版本）"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   docker:
@@ -24,9 +35,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Compute tags
+        id: meta
+        run: |
+          TAGS="ghcr.io/${{ github.repository }}:latest"
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAGS="$TAGS,ghcr.io/${{ github.repository }}:${{ inputs.tag }}"
+          fi
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          no-cache: ${{ inputs.no_cache || false }}
+          tags: ${{ steps.meta.outputs.tags }}

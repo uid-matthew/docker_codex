@@ -1,0 +1,15 @@
+services:
+  codex-dev:
+    image: ghcr.io/<github-username>/codex-dev:latest
+    container_name: codex-dev
+    hostname: codex-dev
+    restart: unless-stopped
+    ports:
+      - "2222:22"
+    volumes:
+      - ./workspace:/workspace
+    environment:
+      SSH_USER: coder
+      SSH_PASSWORD: change-me
+      SSH_PUBLIC_KEY: "ssh-ed25519 AAAA... user@host"
+      OPENAI_API_KEY: "xxx"
